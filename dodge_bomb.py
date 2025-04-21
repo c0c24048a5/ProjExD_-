@@ -10,6 +10,11 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
+    bb_img = pg.Surface((20,20))
+    pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)
+    bb_img.set_colorkey((0, 0, 0))
+    bb_rct = bb_img.get_rect()
+    bb_rct.center = 200, 100
     bg_img = pg.image.load("fig/pg_bg.jpg")    
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
     kk_rct = kk_img.get_rect()
@@ -26,6 +31,10 @@ def main():
             if event.type == pg.QUIT: 
                 return
         screen.blit(bg_img, [0, 0]) 
+
+        bb_move = [0, 0]
+        bb_move[0] += 5
+        bb_move[1] += 5
 
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
@@ -50,7 +59,9 @@ def main():
             DELTA["right"] = D
              
         kk_rct.move_ip(sum_mv)
+        bb_rct.move_ip(bb_move)
         screen.blit(kk_img, kk_rct)
+        screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1
         clock.tick(50)
