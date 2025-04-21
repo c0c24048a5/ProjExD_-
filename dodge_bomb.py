@@ -90,6 +90,8 @@ def main():
         tmr += 1
         clock.tick(50)
         print(kk_rct)
+        if kk_rct.colliderect(bb_rct):
+            return main
 
 
 if __name__ == "__main__":
