@@ -1,7 +1,8 @@
 import os
 import sys
-import pygame as pg
 import time
+import pygame as pg
+
 
 
 WIDTH, HEIGHT = 1100, 650
@@ -28,7 +29,7 @@ def gameover(screen: pg.Surface) -> None:
         pg.display.update()
         time.sleep(5)
 
-def bbscale(time1):
+def bbscale(time1: int) -> tuple[int, int]:
         """
         時間で爆弾のスケールが増加する。
         """
