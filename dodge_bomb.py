@@ -12,8 +12,15 @@ def main():
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     r = 0
     tmr = 0
+    radian = 0
+    inv = 0
     
     def bbscale(time1):
+        """
+        時間で爆弾のスケールが増加する。
+        ・当たり判定が増加しない
+        ・加速度あげてない
+        """
         bb_imgs = []
         time2 = int(time1 / 40)
         if time2 >= 9:
@@ -25,13 +32,47 @@ def main():
             bb_imgs.append(bb_img)
         return bb_imgs[time2]
     
-
+    #kk_muki = {[-5, 0]:pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9), [-5, 5]:pg.transform.rotozoom(pg.image.load("fig/3.png"), 45, 0.9), [0, +5]:pg.transform.rotozoom(pg.image.load("fig/3.png"), -90, 0.9)}
+    def get_kk_img(sum_mv: tuple[int, int]) -> pg.Surface:
+        radian = 0
+        inv = 0
+        if sum_mv == [-5, 0]:
+            radian = 0
+            inv = 0
+        elif sum_mv == [-5, 5]:
+            radian = 45
+            inv = 0
+        elif sum_mv == [0, 5]:
+            radian = 90
+            inv = 90
+        elif sum_mv == [5, 5]:#okasii
+            radian = 45
+            inv = 90
+        elif sum_mv == [5, 0]:
+            radian = 0
+            inv = 90
+        elif sum_mv == [5, -5]:#okasii
+            radian = -45
+            inv = 90
+        elif sum_mv == [0, -5]:
+            radian = 270
+            inv = 0
+        elif sum_mv == [-5, -5]:
+            radian = 315
+            inv = 0
+        else:
+            radian = 0
+            inv = 0
+        kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), radian, 0.9)#360
+        kk_img = pg.transform.flip(kk_img, inv, 0)#90, 0で反転
+        return kk_img
 
     
     bb_rct = bbscale(tmr).get_rect()
     bb_rct.center = 700, 100
     bg_img = pg.image.load("fig/pg_bg.jpg")    
-    kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
+    kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)#360
+    kk_img = pg.transform.flip(kk_img, 0, 0)#90, 0で反転
     kk_rct = kk_img.get_rect()
     kk_rct.center = 100, 200
     clock = pg.time.Clock()
@@ -72,6 +113,7 @@ def main():
         pg.Surface.set_alpha(blackout, 100)
         fonto = pg.font.Font(None, 90)
         kks_img = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 0.9)
+        
         txt = fonto.render("GAMEOVER",
                            True, (0, 0, 0))
         screen.blit(blackout, [0, 0])
@@ -101,6 +143,7 @@ def main():
             y += 1
         bb_move[0] += 5 * ((-1)**x)
         bb_move[1] += 5 * ((-1)**y)
+        
 
     
 
@@ -132,9 +175,9 @@ def main():
              
         kk_rct.move_ip(sum_mv)
         bb_rct.move_ip(bb_move)
-        screen.blit(kk_img, kk_rct)
+        screen.blit(get_kk_img(sum_mv), kk_rct)
         screen.blit(bbscale(tmr), bb_rct)
-        print(tmr, bbscale(tmr))
+        print(tmr, bbscale(tmr), bb_rct)
         pg.display.update()
         tmr += 1
         clock.tick(50)
