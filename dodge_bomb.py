@@ -29,11 +29,15 @@ def main():
             bb_img = pg.Surface((20*r,20*r))
             pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
             bb_img.set_colorkey((0, 0, 0))
+            bb_rct = bb_img.get_rect()
             bb_imgs.append(bb_img)
         return bb_imgs[time2]
     
     #kk_muki = {[-5, 0]:pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9), [-5, 5]:pg.transform.rotozoom(pg.image.load("fig/3.png"), 45, 0.9), [0, +5]:pg.transform.rotozoom(pg.image.load("fig/3.png"), -90, 0.9)}
     def get_kk_img(sum_mv: tuple[int, int]) -> pg.Surface:
+        """
+        こうかとんの進行方向に合わせて向きかえるやつ。
+        """
         radian = 0
         inv = 0
         if sum_mv == [-5, 0]:
@@ -66,6 +70,29 @@ def main():
         kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), radian, 0.9)#360
         kk_img = pg.transform.flip(kk_img, inv, 0)#90, 0で反転
         return kk_img
+    
+    def cale_orientation(org: pg.Rect, dst: pg.Rect,
+                         current_xy: tuple[float, float]) -> tuple[float, float]:
+        """
+        爆弾の自動追尾、慣性なし
+        """
+        nolm_org = 0
+        nolm_dst = 0
+        ans = 0
+        x_bb = 0
+        y_bb = 0
+        nolm_org = ((int(str(org[0]))**2)+(int(str(org[1]))**2))**(1/2)
+        nolm_dst = ((int(str(dst[0]))**2)+(int(str(dst[1]))**2))**(1/2)
+        ans = nolm_org - nolm_dst
+        if int(str(org[0])) - int(str(dst[0])) > 0:
+            x_bb = -1
+        else:
+            x_bb = 1
+        if int(str(org[1])) - int(str(dst[1])) > 0:
+            y_bb = -1
+        else:
+            y_bb = 1
+        return [int(str(current_xy[0]))*x_bb, int(str(current_xy[1]))*y_bb]
 
     
     bb_rct = bbscale(tmr).get_rect()
@@ -136,14 +163,16 @@ def main():
                 return
         screen.blit(bg_img, [0, 0]) 
 
-        bb_move = [0, 0]
-        if cheak_bound(bb_rct) == "xout_left" or cheak_bound(bb_rct) == "xout_right":
-            x += 1
-        elif cheak_bound(bb_rct) == "yout_down" or cheak_bound(bb_rct) == "yout_up":
-            y += 1
-        bb_move[0] += 5 * ((-1)**x)
-        bb_move[1] += 5 * ((-1)**y)
+        bb_move = cale_orientation(bb_rct, kk_rct, [2, 2])
+        #if cheak_bound(bb_rct) == "xout_left" or cheak_bound(bb_rct) == "xout_right":
+            #x += 1
+        #elif cheak_bound(bb_rct) == "yout_down" or cheak_bound(bb_rct) == "yout_up":
+            #y += 1
+        #bb_move[0] += 5 * ((-1)**x)
+        #bb_move[1] += 5 * ((-1)**y)
+        print(bb_move)
         
+
 
     
 
@@ -175,6 +204,7 @@ def main():
              
         kk_rct.move_ip(sum_mv)
         bb_rct.move_ip(bb_move)
+        bb_rct = bbscale(tmr).get_rect()
         screen.blit(get_kk_img(sum_mv), kk_rct)
         screen.blit(bbscale(tmr), bb_rct)
         print(tmr, bbscale(tmr), bb_rct)
