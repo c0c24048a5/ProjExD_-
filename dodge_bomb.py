@@ -1,26 +1,41 @@
 import os
 import sys
 import pygame as pg
+import time
 
 
 WIDTH, HEIGHT = 1100, 650
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
-    bb_img = pg.Surface((20,20))
-    pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)
-    bb_img.set_colorkey((0, 0, 0))
-    bb_rct = bb_img.get_rect()
-    bb_rct.center = 200, 100
+    r = 0
+    tmr = 0
+    
+    def bbscale(time1):
+        bb_imgs = []
+        time2 = int(time1 / 40)
+        if time2 >= 9:
+            time2 = 9
+        for r in range(1, 11):
+            bb_img = pg.Surface((20*r,20*r))
+            pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
+            bb_img.set_colorkey((0, 0, 0))
+            bb_imgs.append(bb_img)
+        return bb_imgs[time2]
+    
+
+
+    
+    bb_rct = bbscale(tmr).get_rect()
+    bb_rct.center = 700, 100
     bg_img = pg.image.load("fig/pg_bg.jpg")    
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
     kk_rct = kk_img.get_rect()
     kk_rct.center = 100, 200
     clock = pg.time.Clock()
-    tmr = 0
+    
     DELTA = {"up":None, "down":None, "left":None, "right":None}
     A = 0
     B = 0
@@ -28,7 +43,12 @@ def main():
     D = 0
     x = 0
     y = 0
+
     def cheak_bound(position):
+        """
+        引数：rect
+        戻り値：上下左右の判定結果
+        """
         size = int(str(position[3]))
         if position[0] >= 1100 - size:
             return "xout_left"
@@ -40,6 +60,34 @@ def main():
             return "yout_up"
         else:
             return True
+        
+    def gameover(screen: pg.Surface) -> None:
+        """
+        かなり荒いので修正の必要あり
+        ・テキストを中心に出す方法
+        ・イメージとテキストを同時に並べる方法
+        """
+        blackout = pg.Surface((1100, 650))
+        pg.draw.rect(blackout, (0, 0, 0), (0, 0,1100, 650), 1)
+        pg.Surface.set_alpha(blackout, 100)
+        fonto = pg.font.Font(None, 90)
+        kks_img = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 0.9)
+        txt = fonto.render("GAMEOVER",
+                           True, (0, 0, 0))
+        screen.blit(blackout, [0, 0])
+        screen.blit(kks_img, [450, 300])
+        screen.blit(txt, [500, 300])
+        screen.blit(kks_img, [870, 300])
+        pg.display.update()
+        time.sleep(5)
+        return main
+
+        #一瞬しか出ないが
+        
+    
+
+
+    
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -85,13 +133,18 @@ def main():
         kk_rct.move_ip(sum_mv)
         bb_rct.move_ip(bb_move)
         screen.blit(kk_img, kk_rct)
-        screen.blit(bb_img, bb_rct)
+        screen.blit(bbscale(tmr), bb_rct)
+        print(tmr, bbscale(tmr))
         pg.display.update()
         tmr += 1
         clock.tick(50)
-        print(kk_rct)
+        #print(kk_rct)
         if kk_rct.colliderect(bb_rct):
-            return main
+            #return main
+            gameover(screen)
+
+
+
 
 
 if __name__ == "__main__":
